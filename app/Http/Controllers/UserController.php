@@ -15,19 +15,23 @@ class UserController extends Controller
      *
      * @return void
      */
+    
+    private $payload;
+
     public function __construct()
     {
-        //
+        $token = JWTAuth::getToken();
+        $this->payload = JWTAuth::getPayload($token)->toArray();
     }
 
     public function profile(Request $request) 
     {
-        $token = JWTAuth::getToken();
-        $payload = JWTAuth::getPayload($token)->toArray();
+        // $token = JWTAuth::getToken();
+        // $payload = JWTAuth::getPayload($token)->toArray();
 
         $out = [
             'status' => 200,
-            'data'   => User::find($payload['sub'])
+            'data'   => User::find($this->payload['sub'])
         ];
         
         return ResponseBuilder::result($out);
@@ -41,17 +45,14 @@ class UserController extends Controller
         ]);
 
         $check = User::firstWhere('email', $request->input('email'));
-        
-        $token = JWTAuth::getToken();
-        $payload = JWTAuth::getPayload($token)->toArray();
 
-        if (!$check || ($check && $check->id == $payload['sub'])) {
+        if (!$check || ($check && $check->id == $this->payload['sub'])) {
             $data = [
                 'name'  => $request->input('name'),
                 'email' => $request->input('email')
             ];
     
-            $user = User::find($payload['sub']);
+            $user = User::find($this->payload['sub']);
             $update = $user->update($data);
      
             if ($update) {
@@ -84,11 +85,8 @@ class UserController extends Controller
         $this->validate($request, [
             'password'  => 'required'
         ]);
-        
-        $token = JWTAuth::getToken();
-        $payload = JWTAuth::getPayload($token)->toArray();
 
-        $user = User::find($payload['sub']);
+        $user = User::find($this->payload['sub']);
 
         // Verify the password and generate the token
         if (Hash::check($request->input('password'), $user->password)) {

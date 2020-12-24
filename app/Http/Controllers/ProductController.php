@@ -17,9 +17,12 @@ class ProductController extends Controller
      *
      * @return void
      */
+    private $payload;
+
     public function __construct()
     {
-        //
+        $token = JWTAuth::getToken();
+        $this->payload = JWTAuth::getPayload($token)->toArray();
     }
 
     public function show(Request $request)
@@ -47,9 +50,11 @@ class ProductController extends Controller
         $date = date_format($view->created_at,"Y-m-d");
         $now = date("Y-m-d");
 
+        // compare date for count view
         if (!$view || ($now > $date)) {
             ProductView::create(['user_id' => $payload['sub'], 'product_id' => $id]);
         }
+
         $product = DB::table('products as p')
                       ->join('users as u', 'p.user_id', '=', 'u.id')
                       ->join('categories as c', 'p.category_id', '=', 'c.id')
@@ -90,14 +95,11 @@ class ProductController extends Controller
                 'price'       => 'required|numeric',
                 'category_id' => 'required'
             ]);
-
-            $token = JWTAuth::getToken();
-            $payload = JWTAuth::getPayload($token)->toArray();
  
             $data = [
                 'name'        => $request->input('name'),
                 'price'       => $request->input('price'),
-                'user_id'     => $payload['sub'],
+                'user_id'     => $this->payload['sub'],
                 'category_id' => $request->input('category_id')
             ];
  
@@ -134,14 +136,11 @@ class ProductController extends Controller
             ]);
 
             $product = Product::find($request->input('id'));
-
-            $token = JWTAuth::getToken();
-            $payload = JWTAuth::getPayload($token)->toArray();
  
             $data = [
                 'name'        => $request->input('name'),
                 'price'       => $request->input('price'),
-                'user_id'     => $payload['sub'],
+                'user_id'     => $this->payload['sub'],
                 'category_id' => $request->input('category_id')
             ];
 
@@ -153,7 +152,7 @@ class ProductController extends Controller
                 'product_id'  => $product->id
             ];
 
-            if ($payload['sub'] == $product->user_id) {
+            if ($this->payload['sub'] == $product->user_id) {
                 $update = $product->update($data);
                 $history = ProductHistory::create($dataHistory);
  
@@ -185,10 +184,7 @@ class ProductController extends Controller
     {
         $product =  Product::find($id);
 
-        $token = JWTAuth::getToken();
-        $payload = JWTAuth::getPayload($token)->toArray();
-
-        if ($payload['sub'] == $product->user_id) {
+        if ($this->payload['sub'] == $product->user_id) {
             if (!$product) {
                 $out  = [
                     "status"   => 404,
