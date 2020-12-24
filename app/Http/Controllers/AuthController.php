@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Helper\ResponseBuilder;
 
 class AuthController extends Controller
 {
@@ -46,30 +47,25 @@ class AuthController extends Controller
      
                 if ($insert) {
                     $out  = [
-                        "name" => "OK",
                         "status"  => 200,
                         "message" => "Success insert data!",
-                        "data" => $data
+                        "data"    => $data
                     ];
                 } else {
                     $out  = [
-                        "name" => "ERR",
                         "status"   => 400,
-                        "message" => "Failed insert data!",
-                        "data" => $data
+                        "message"  => "Failed insert data!",
+                        "data"     => $data
                     ];
                 }
             } else {
                 $out  = [
-                    "name" => "ERR",
                     "status"   => 400,
-                    "message" => "Duplicate Email!",
-                    "data" => []
+                    "message"  => "Duplicate Email!"
                 ];
             }
- 
- 
-            return response()->json($out, $out['status']);
+
+            return ResponseBuilder::result($out);
         }
     }
 
@@ -77,7 +73,7 @@ class AuthController extends Controller
     {
           //validate incoming request 
           $this->validate($request, [
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
@@ -85,43 +81,36 @@ class AuthController extends Controller
         $user = User::firstwhere('email', $request->input('email'));
 
         if (!$user) {
-            // You wil probably have some sort of helpers or whatever
-            // to make sure that you have the same response format for
-            // differents kind of responses. But let's return the 
-            // below respose for now.
-            return response()->json([
-                'error' => 'Email does not exist.'
-            ], 400);
+            $out  = [
+                "status"  => 404,
+                "message" => "Email does not exist!",
+            ];
+
+            return ResponseBuilder::result($out);
         }
         // Verify the password and generate the token
         if (Hash::check($request->input('password'), $user->password)) {
             // Get the token
             $token = Auth::login($user);
 
-            return response()->json([
-                'data' => $token
-            ], 200);
+            $out  = [
+                "status"  => 200,
+                "data"    => [
+                    "token"      => $token,
+                    'token_type' => 'bearer',
+                    'expires_in' => Auth::factory()->getTTL() * 60
+                ]
+            ];
+
+            return ResponseBuilder::result($out);
+        } else {
+            $out  = [
+                "status"  => 400,
+                "message" => "Email or password is wrong!",
+            ];
+
+            return ResponseBuilder::result($out);
         }
-                
-        // Bad Request response
-        return response()->json([
-            'error' => 'Email or password is wrong.'
-        ], 400);
-
-        // Get the token
-        $token = Auth::login($user);
-
-        $credentials = $request->only(['email', 'password']);
-
-        if (! $token = Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        return response()->json([
-            'token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60
-        ], 200);
     }
 
     public function logout() 
@@ -130,16 +119,21 @@ class AuthController extends Controller
         // Invalidate the token
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json([
-                "status" => "success", 
-                "message"=> "User successfully logged out."
-            ]);
+            $out  = [
+                "status"  => 200,
+                "message" => "User successfully logged out!",
+            ];
+
+            return ResponseBuilder::result($out);
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token
-            return response()->json([
-            "status" => "error", 
-            "message" => "Failed to logout, please try again."
-            ], 500);
+            $out  = [
+                "status"  => 500,
+                "message" => "Failed to logout, please try again.",
+                "data"    => $e
+            ];
+
+            return ResponseBuilder::result($out);
         }
 }
 }
