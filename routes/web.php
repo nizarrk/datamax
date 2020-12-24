@@ -58,9 +58,10 @@ $router->group(
             ]
         );
 
+        /* CATEGORY ROUTES*/
         $router->get('category', 
             [
-                'uses' => 'CategoryController@index'
+                'uses' => 'CategoryController@show'
             ]
         );
 
@@ -77,9 +78,40 @@ $router->group(
         );  
 
         $router->delete('category/{id}', 
-        [
-            'uses' => 'CategoryController@destroy'
-        ]
-    );
+            [
+                'uses' => 'CategoryController@destroy'
+            ]
+        );
+
+        /* PRODUCT ROUTES*/
+        $router->get('product', 
+            [
+                'uses' => 'ProductController@show'
+            ]
+        );
+
+        $router->get('product/{id}', 
+            [
+                'uses' => 'ProductController@showById'
+            ]
+        );
+
+        $router->post('product', 
+            [
+                'uses' => 'ProductController@store'
+            ]
+        );
+
+        $router->put('product', 
+            [
+                'uses' => 'ProductController@update'
+            ]
+        );  
+
+        $router->delete('product/{id}', 
+            [
+                'uses' => 'ProductController@destroy'
+            ]
+        );
     }
 );
