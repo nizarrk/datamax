@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Helper\ResponseBuilder;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -18,9 +19,12 @@ class CategoryController extends Controller
         //
     }
 
-    public function index()
+    public function show()
     {
-        $data = Category::OrderBy("id", "DESC")->paginate(10);
+        $data = DB::table('categories as c')
+                   ->leftjoin('categories as c2', 'c.parent_id', '=', 'c2.id')
+                   ->select('c.*', 'c2.name as parent_name')
+                   ->get();
  
         $out  = [
             "status"  => 200,
