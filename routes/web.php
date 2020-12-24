@@ -16,3 +16,28 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post(
+    'auth/login', 
+    [
+       'uses' => 'AuthController@login'
+    ]
+);
+
+$router->post(
+    'auth/register', 
+    [
+       'uses' => 'AuthController@register'
+    ]
+);
+
+$router->group(
+    ['middleware' => 'auth'], 
+    function() use ($router) {
+        $router->post('auth/logout', 
+            [
+            'uses' => 'AuthController@logout'
+            ]
+        );
+    }
+);
