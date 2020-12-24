@@ -9,6 +9,8 @@ Dibuat dengan Lumen. Cara install:
     php artisan migrate
 4. Jalankan dengan perintah
     php -S localhost:8080 -t public
+5. Dokumentasi postman
+    https://documenter.getpostman.com/view/4828620/TVsxA5xQ
 
 notes: soal nomor 1 2 sudah dipush ke repo, terima kasih. :)
 
