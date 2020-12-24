@@ -36,7 +36,25 @@ $router->group(
     function() use ($router) {
         $router->post('auth/logout', 
             [
-            'uses' => 'AuthController@logout'
+                'uses' => 'AuthController@logout'
+            ]
+        );
+
+        $router->get('user/profile', 
+            [
+                'uses' => 'UserController@profile'
+            ]
+        );
+
+        $router->put('user/profile', 
+            [
+                'uses' => 'UserController@editProfile'
+            ]
+        );
+
+        $router->put('user/profile/password', 
+            [
+                'uses' => 'UserController@changePassword'
             ]
         );
     }
