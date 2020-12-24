@@ -57,5 +57,29 @@ $router->group(
                 'uses' => 'UserController@changePassword'
             ]
         );
+
+        $router->get('category', 
+            [
+                'uses' => 'CategoryController@index'
+            ]
+        );
+
+        $router->post('category', 
+            [
+                'uses' => 'CategoryController@store'
+            ]
+        );
+
+        $router->put('category', 
+            [
+                'uses' => 'CategoryController@update'
+            ]
+        );  
+
+        $router->delete('category/{id}', 
+        [
+            'uses' => 'CategoryController@destroy'
+        ]
+    );
     }
 );
