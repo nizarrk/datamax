@@ -19,7 +19,7 @@ class ResponseBuilder {
             "status"  => $data['status'],
             "error"   => $data['status'] == 200 ? false : true,
             "message" => !empty($data['message']) ? $data['message'] : "Successfully Executed!",
-            "data" => $data['data'] ? $data['data'] : []
+            "data" => !empty($data['data']) ? $data['data'] : []
         ];
         
         return response()->json($output, $output['status']);
